@@ -1,6 +1,7 @@
 package com.hao.cubc.ui
 
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.enableEdgeToEdge
 import com.hao.cubc.R
@@ -10,13 +11,33 @@ import com.hao.cubc.R
 import com.hao.cubc.data.api.TwseApiService
 import com.hao.cubc.data.repository.StockRepository
 import com.hao.cubc.viewmodel.StockViewModel
+import com.hao.cubc.ui.screens.StockMainScreen
+import com.hao.cubc.ui.theme.StockTheme
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        setContent {
+            // 1. 建立一個狀態，預設跟隨系統
+            var isDarkMode by remember { mutableStateOf(false) }
+
+            StockTheme {
+                StockMainScreen(
+                    isDarkMode = isDarkMode, // 傳入目前的狀態
+                    onThemeToggle = {        // 傳入「點擊後要做什麼」的代碼塊
+                        isDarkMode = !isDarkMode
+                    }
+                )
+            }
+        }
 
         // 1. 初始化 Retrofit 與 Service
         val retrofit = Retrofit.Builder()

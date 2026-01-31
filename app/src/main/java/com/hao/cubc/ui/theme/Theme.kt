@@ -11,6 +11,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+import androidx.compose.ui.graphics.Color
+
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
@@ -53,6 +55,31 @@ fun CubcTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        content = content
+    )
+}
+
+@Composable
+fun StockTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) {
+        darkColorScheme(
+            primary = Color(0xFFBB86FC),
+            background = Color(0xFF121212), // 夜間背景
+            surface = Color(0xFF1E1E1E)
+        )
+    } else {
+        lightColorScheme(
+            primary = Color(0xFF6200EE),
+            background = Color(0xFFFFFFFF), // 白天背景
+            surface = Color(0xFFF5F5F5)
+        )
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
         content = content
     )
 }
