@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.hao.cubc.data.model.StockAvgPriceModel
 import com.hao.cubc.data.model.StockDayDetailModel
 import com.hao.cubc.data.model.StockPeModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun StockListScreen(
@@ -46,7 +47,15 @@ fun StockListScreen(
 
             val peItem = peList.find { it.Code == detailItem.Code }
             val avgItem = avgList.find { it.Code == detailItem.Code }
-            
+
+            // 自動翻轉回來的功能 (LaunchedEffect)
+            LaunchedEffect(isFlipped) {
+                if (isFlipped) {
+                    delay(5000) // ⏳ 設定停留時間，例如 5 秒
+                    isFlipped = false // 自動翻轉回正面
+                }
+            }
+
             // 動態計算翻轉角度
             val rotation by animateFloatAsState(
                 targetValue = if (isFlipped) 180f else 0f,
@@ -54,7 +63,7 @@ fun StockListScreen(
                 label = "CardFlip"
             )
 
-            // 💡 這裡定義 Card 的統一高度
+            // 這裡定義 Card 的統一高度
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
