@@ -1,13 +1,8 @@
 package com.hao.cubc.ui.screens
 
-import PreviewStockFrontContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterList
@@ -31,10 +26,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hao.cubc.data.model.StockAvgPriceModel
+import com.hao.cubc.data.model.StockDayDetailModel
+import com.hao.cubc.data.model.StockPeModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StockMainScreen(
+    stockData: Triple<List<StockPeModel>, List<StockAvgPriceModel>, List<StockDayDetailModel>>, // 💡 確保有名稱叫 stockData
     isDarkMode: Boolean,          // 新增這個參數
     onThemeToggle: () -> Unit      // 新增這個參數，對應 MainActivity 傳來的 Lambda
 ){
@@ -43,6 +42,7 @@ fun StockMainScreen(
     val sheetState = rememberModalBottomSheetState()
 
     // Scaffold 是主佈局結構
+    val (peList, avgList, detailList) = stockData
     Scaffold(
         topBar = {
             TopAppBar(
@@ -72,21 +72,12 @@ fun StockMainScreen(
             )
         }
     ) { paddingValues ->
-        // 2. 中間 Scroll 區域 (LazyColumn)
-        // 這裡我們暫時用迴圈產生 20 個假元件來測試捲動
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(20) { index ->
-                // 這裡呼叫我們剛才寫的 StockFlipCard
-                // 即使不帶資料，它也會顯示我們寫死的「台積電」
-//                StockFrontContent()
-                PreviewStockFrontContent()
-            }
+        Column(modifier = Modifier.padding(paddingValues)) {
+            StockListScreen(
+                detailList = detailList,
+                peList = peList,
+                avgList = avgList
+            )
         }
     }
 

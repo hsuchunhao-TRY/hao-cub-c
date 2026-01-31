@@ -28,7 +28,8 @@ import com.hao.cubc.data.model.StockPeModel
 fun StockFrontContent(
     pe: StockPeModel?,
     avg: StockAvgPriceModel?,
-    detail: StockDayDetailModel
+    detail: StockDayDetailModel,
+    modifier: Modifier = Modifier
 ) {
     val closingVsAvgColor = getComparisonColor(detail.ClosingPrice, avg?.MonthlyAveragePrice)
     val openingVsAvgColor = getComparisonColor(detail.OpeningPrice, avg?.MonthlyAveragePrice)

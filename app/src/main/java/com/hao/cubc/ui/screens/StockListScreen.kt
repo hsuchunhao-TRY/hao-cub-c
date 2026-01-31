@@ -1,8 +1,12 @@
+package com.hao.cubc.ui.screens
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -16,35 +20,51 @@ import com.hao.cubc.data.model.StockAvgPriceModel
 import com.hao.cubc.data.model.StockDayDetailModel
 import com.hao.cubc.data.model.StockPeModel
 import com.hao.cubc.ui.screens.StockFrontContent
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun StockListScreen(
-    detailList: List<StockDayDetailModel>, // 主清單 (例如 1000 筆)
-    peList: List<StockPeModel>,           // 基本面 (可能只有 500 筆)
-    avgList: List<StockAvgPriceModel>      // 均價 (可能只有 800 筆)
+    detailList: List<StockDayDetailModel>,
+    peList: List<StockPeModel>,
+    avgList: List<StockAvgPriceModel>
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // 以 detailList 為基準，因為它是你的 11 欄位核心
         items(detailList) { detailItem ->
+            // --- 1. 這裡為每一列宣告獨立的狀態 ---
+            var isLocalDialogOpen by remember { mutableStateOf(false) }
 
-            // --- 關鍵動作：配對 ---
-            // 根據股票代號 (Code) 去另外兩個 List 找資料
             val peItem = peList.find { it.Code == detailItem.Code }
             val avgItem = avgList.find { it.Code == detailItem.Code }
 
-            // --- 呼叫你的組件 ---
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable {
+                        Log.d("CLICK", "點擊了 ${detailItem.Name}")
+                        isLocalDialogOpen = true
+                    },
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 StockFrontContent(
                     detail = detailItem,
-                    pe = peItem,   // 如果沒找到，find 會回傳 null，剛好符合你的參數定義
+                    pe = peItem,
                     avg = avgItem
+                )
+            }
+
+            // --- 2. 對話框也放在 items 內部 ---
+            if (isLocalDialogOpen) {
+                StockDetailAlertDialog(
+                    pe = peItem,
+                    onDismiss = { isLocalDialogOpen = false }
                 )
             }
         }
