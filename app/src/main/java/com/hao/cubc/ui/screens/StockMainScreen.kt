@@ -1,8 +1,10 @@
 package com.hao.cubc.ui.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterList
@@ -15,6 +17,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -24,56 +27,94 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.hao.cubc.data.model.StockAvgPriceModel
 import com.hao.cubc.data.model.StockDayDetailModel
 import com.hao.cubc.data.model.StockPeModel
+import com.hao.cubc.utils.generateEtfList
+import com.hao.cubc.utils.searchStocks
+import com.hao.cubc.utils.sortByCode
+
+enum class StockFilterOption {
+    CODE_DESC,  // 依股票代號降序
+    CODE_ASC,   // 依股票代號升序
+    ETF_ONLY    // ETF
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StockMainScreen(
-    stockData: Triple<List<StockPeModel>, List<StockAvgPriceModel>, List<StockDayDetailModel>>, // 💡 確保有名稱叫 stockData
-    isDarkMode: Boolean,          // 新增這個參數
-    onThemeToggle: () -> Unit      // 新增這個參數，對應 MainActivity 傳來的 Lambda
+    stockData: Triple<List<StockPeModel>, List<StockAvgPriceModel>, List<StockDayDetailModel>>,
+    isDarkMode: Boolean,
+    onThemeToggle: () -> Unit
 ){
-    // 狀態宣告：控制 BottomSheet 是否顯示
+    val (peList, avgList, detailList) = stockData
+
+    // 💡 1. 統一狀態定義在最上方
     var showSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    var searchQuery by remember { mutableStateOf("") }
+    var currentOption by remember { mutableStateOf(StockFilterOption.CODE_ASC) }
 
-    // Scaffold 是主佈局結構
-    val (peList, avgList, detailList) = stockData
+    // 💡 2. 核心管線：這裡只定義一次
+    val displayList = remember(detailList, searchQuery, currentOption) {
+        if (searchQuery.isNotEmpty()) {
+            detailList.filter {
+                it.Code.contains(searchQuery, ignoreCase = true) ||
+                        it.Name.contains(searchQuery, ignoreCase = true)
+            }
+        } else {
+            when (currentOption) {
+                StockFilterOption.CODE_DESC -> detailList.sortedByDescending { it.Code }
+                StockFilterOption.CODE_ASC -> detailList.sortedBy { it.Code }
+                StockFilterOption.ETF_ONLY -> {
+                    detailList.filter { it.Code.startsWith("00") || it.Code.startsWith("01") }
+                        .sortedBy { it.Code }
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("台股即時快訊") },
                 actions = {
-                    // --- 夜間模式切換按鈕 ---
                     IconButton(onClick = onThemeToggle) {
-                        Icon(
-                            imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = "切換主題"
-                        )
+                        Icon(if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode, "主題")
                     }
-
-                    // 1. 右上方加個 Filter Button
                     IconButton(onClick = { showSheet = true }) {
-                        Icon(
-                            imageVector = Icons.Default.FilterList,
-                            contentDescription = "篩選排序"
-                        )
+                        Icon(Icons.Default.FilterList, "篩選")
                     }
-                },
-                // 設定 TopBar 顏色，這裡會自動適應夜間模式
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                }
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // 🔍 搜尋框
+            TextField(
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                    // 💡 如果你希望搜尋時自動解除 ETF 模式，可以加這行：
+                    // if(it.isNotEmpty()) currentOption = StockFilterOption.CODE_ASC
+                },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("搜尋代碼或名稱") },
+                singleLine = true
+            )
+
+            // 💡 顯示清單
             StockListScreen(
+                displayList = displayList,
                 detailList = detailList,
                 peList = peList,
                 avgList = avgList
@@ -81,24 +122,28 @@ fun StockMainScreen(
         }
     }
 
-    // 3. 彈出選單 (Filter Menu)
     if (showSheet) {
         ModalBottomSheet(
             onDismissRequest = { showSheet = false },
-            sheetState = sheetState,
-            // 指定 Sheet 的背景色，也會自動適配夜間模式
-            containerColor = MaterialTheme.colorScheme.surface
+            sheetState = sheetState
         ) {
-            // 彈出選單內的排版
-            FilterMenuContent {
-                showSheet = false // 點擊選項後關閉選單
-            }
+            FilterMenuContent(onOptionSelected = { selected ->
+                currentOption = selected
+                searchQuery = "" // 💡 點選選單時清空搜尋，確保篩選能生效
+                showSheet = false
+            })
         }
     }
 }
 
 @Composable
-fun FilterMenuContent(onOptionClick: () -> Unit) {
+fun FilterMenuContent(onOptionSelected: (StockFilterOption) -> Unit) {
+    val options = listOf(
+        "依股票代號降序" to StockFilterOption.CODE_DESC,
+        "依股票代號升序" to StockFilterOption.CODE_ASC,
+        "ETF" to StockFilterOption.ETF_ONLY
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,10 +157,9 @@ fun FilterMenuContent(onOptionClick: () -> Unit) {
         )
 
         // 模擬幾個按鈕
-        val options = listOf("成交價 (高->低)", "漲跌幅 (高->低)", "成交金額 (高->低)", "成交股數 (高->低)")
-        options.forEach { label ->
+        options.forEach { (label, option) ->
             OutlinedButton(
-                onClick = onOptionClick,
+                onClick = { onOptionSelected(option) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
             ) {
                 Text(label)

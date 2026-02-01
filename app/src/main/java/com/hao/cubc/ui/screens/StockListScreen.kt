@@ -33,41 +33,44 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun StockListScreen(
+    displayList: List<StockDayDetailModel>,
     detailList: List<StockDayDetailModel>,
     peList: List<StockPeModel>,
     avgList: List<StockAvgPriceModel>
 ) {
+    // 這裡我們直接使用傳入的 displayList 進行 LazyColumn 繪製
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(detailList) { detailItem ->
+        // 💡 關鍵：對 displayList 進行迭代
+        items(displayList, key = { it.Code }) { detailItem ->
+
+            // --- 你原本的卡片狀態與邏輯 ---
             var isFlipped by remember { mutableStateOf(false) }
 
+            // 從傳入的輔助清單中尋找對應代碼的資料
             val peItem = peList.find { it.Code == detailItem.Code }
             val avgItem = avgList.find { it.Code == detailItem.Code }
 
-            // 自動翻轉回來的功能 (LaunchedEffect)
             LaunchedEffect(isFlipped) {
                 if (isFlipped) {
-                    delay(5000) // ⏳ 設定停留時間，例如 5 秒
-                    isFlipped = false // 自動翻轉回正面
+                    delay(5000)
+                    isFlipped = false
                 }
             }
 
-            // 動態計算翻轉角度
             val rotation by animateFloatAsState(
                 targetValue = if (isFlipped) 180f else 0f,
                 animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
                 label = "CardFlip"
             )
 
-            // 這裡定義 Card 的統一高度
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp) // 固定高度確保正反面大小一致
+                    .height(180.dp)
                     .graphicsLayer {
                         rotationY = rotation
                         cameraDistance = 12f * density
@@ -85,11 +88,8 @@ fun StockListScreen(
                             modifier = Modifier.fillMaxSize() // 填滿 Card
                         )
                     } else {
-                        // 背面
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer { rotationY = 180f }, // 修正文字鏡像
+                            modifier = Modifier.fillMaxSize().graphicsLayer { rotationY = 180f },
                             contentAlignment = Alignment.Center
                         ) {
                             StockBackContent(detailItem, peItem)
