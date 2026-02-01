@@ -72,7 +72,7 @@ fun StockListScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(210.dp)
                     .graphicsLayer {
                         rotationY = rotation
                         cameraDistance = 12f * density

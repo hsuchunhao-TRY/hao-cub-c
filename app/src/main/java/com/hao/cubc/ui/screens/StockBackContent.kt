@@ -42,10 +42,10 @@ fun StockBackContent(detail: StockDayDetailModel, pe: StockPeModel?) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "最後更新時間：${java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"))}",
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.Gray
-        )
+//        Text(
+//            text = "最後更新時間：${java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"))}",
+//            style = MaterialTheme.typography.labelSmall,
+//            color = Color.Gray
+//        )
     }
 }

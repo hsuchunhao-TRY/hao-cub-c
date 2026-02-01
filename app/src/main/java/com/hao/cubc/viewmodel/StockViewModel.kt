@@ -42,26 +42,26 @@ class StockViewModel(private val repository: StockRepository) : ViewModel() {
                 delay(POLLING_INTERVAL)
             }
         }
-        .onEach { result -> // 💡 這裡拿到的是整個 Triple
+        .onEach { result -> // 這裡拿到的是整個 Triple
             val (peList, avgList, dayList) = result
 
-            // 💡 關鍵：必須把資料存進變數，UI 才會重畫！
+            // 關鍵：必須把資料存進變數，UI 才會重畫！
             stockData = result
 
-            Log.d("StockPolling", "========= 輪詢數據更新 =========")
-            Log.d("StockPolling", "1. BWIBBU_ALL (本益比)  : ${peList.size} 筆")
-            Log.d("StockPolling", "2. STOCK_DAY_AVG (均價) : ${avgList.size} 筆")
-            Log.d("StockPolling", "3. STOCK_DAY_ALL (成交) : ${dayList.size} 筆")
+            Log.d(TAG, "========= 輪詢數據更新 =========")
+            Log.d(TAG, "1. BWIBBU_ALL (本益比)  : ${peList.size} 筆")
+            Log.d(TAG, "2. STOCK_DAY_AVG (均價) : ${avgList.size} 筆")
+            Log.d(TAG, "3. STOCK_DAY_ALL (成交) : ${dayList.size} 筆")
 
             // 如果想確認內容，也可以各挑一筆印出來
             if (dayList.isNotEmpty()) {
                 val topStock = dayList[0]
-                Log.d("StockPolling", "即時快訊 -> ${topStock.Name}: 價格 ${topStock.ClosingPrice}, 漲跌 ${topStock.Change}")
+                Log.d(TAG, "即時快訊 -> ${topStock.Name}: 價格 ${topStock.ClosingPrice}, 漲跌 ${topStock.Change}")
             }
-            Log.d("StockPolling", "================================")
+            Log.d(TAG, "================================")
         }
         .catch { e ->
-            Log.e("StockPolling", "輪詢發生錯誤: ${e.message}")
+            Log.e(TAG, "輪詢發生錯誤: ${e.message}")
         }
         .launchIn(viewModelScope) // 在 ViewModel 的生命週期內運行，銷毀時自動停止
     }

@@ -13,21 +13,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,7 +50,6 @@ import com.hao.cubc.data.model.StockDayDetailModel
 import com.hao.cubc.data.model.StockPeModel
 import com.hao.cubc.ui.CategoryManager
 import com.hao.cubc.ui.FavoriteManager
-import androidx.compose.foundation.lazy.items
 
 enum class StockFilterOption {
     CODE_DESC,  // 依股票代號降序
@@ -307,21 +304,5 @@ fun SimpleMenuRow(label: String, onClick: () -> Unit) {
             )
             HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
         }
-    }
-}
-
-// 封裝一個通用的按鈕樣式，讓選單看起來一致
-@Composable
-fun FilterMenuButton(label: String, onClick: () -> Unit) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }
