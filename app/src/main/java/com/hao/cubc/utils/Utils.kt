@@ -3,25 +3,10 @@ package com.hao.cubc.utils
 import com.hao.cubc.data.model.StockDayDetailModel
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class StockGroupItem(
-    val code: String,
-    val name: String
-)
 
-@Serializable
-data class StockGroupConfig(
-    val aiList: List<StockGroupItem> = emptyList(),
-    val shippingList: List<StockGroupItem> = emptyList(),
-    val inventoryList: List<StockGroupItem> = emptyList(),
-    val robotList: List<StockGroupItem> = emptyList(),
-    val financeList: List<StockGroupItem> = emptyList(),
-    val traditionalList: List<StockGroupItem> = emptyList()
-)
-data class StockSimpleModel(
-    val code: String,
-    val name: String
-)
+typealias DynamicCategoryConfig = Map<String, List<StockItem>>
+
+data class StockItem(val code: String, val name: String)
 
 /**
  * 根據股票代碼進行排序
@@ -52,9 +37,9 @@ fun generateEtfList(allData: List<StockDayDetailModel>): List<StockDayDetailMode
 /**
  * 將原始詳細資料轉換為精簡的「代碼/名稱」清單
  */
-fun getSimpleStockList(fullList: List<StockDayDetailModel>): List<StockSimpleModel> {
+fun getSimpleStockList(fullList: List<StockDayDetailModel>): List<StockItem> {
     return fullList.map {
-        StockSimpleModel(code = it.Code, name = it.Name)
+        StockItem(code = it.Code, name = it.Name)
     }.distinctBy { it.code } // 確保代碼不重複
 }
 

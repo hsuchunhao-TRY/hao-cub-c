@@ -23,8 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hao.cubc.data.model.StockAvgPriceModel
 import com.hao.cubc.data.model.StockDayDetailModel
@@ -85,7 +83,7 @@ fun StockListScreen(
                             detail = detailItem,
                             pe = peItem,
                             avg = avgItem,
-                            modifier = Modifier.fillMaxSize() // 填滿 Card
+                            modifier = Modifier.fillMaxSize()
                         )
                     } else {
                         Box(
@@ -99,23 +97,4 @@ fun StockListScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true, device = Devices.PIXEL_4)
-@Composable
-fun PreviewStockFrontContent() {
-    // 這裡就是模擬 call 的動作
-    StockFrontContent(
-        detail = StockDayDetailModel(
-            Code = "2330", Name = "台積電", ClosingPrice = "1030",
-            Change = "+5.0", OpeningPrice = "1025", HighestPrice = "1035",
-            LowestPrice = "1020", Transaction = "45,123",
-            TradeVolume = "25,432,000", TradeValue = "26.2B", Date = "20240520"
-        ),
-        pe = null, // 模擬：如果 PE 資料還沒回來或找不到
-        avg = StockAvgPriceModel(
-            Date = "20240520", Code = "2330", Name = "台積電",
-            ClosingPrice = "1030", MonthlyAveragePrice = "1015.5"
-        )
-    )
 }
