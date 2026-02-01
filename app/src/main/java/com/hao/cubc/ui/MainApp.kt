@@ -29,6 +29,7 @@ fun MainApp(
 ) {
     val context = LocalContext.current
     val categoryManager = remember { CategoryManager(context) }
+    val favoriteManager = remember { FavoriteManager(context) }
 
     // 💡 加入這段：確保進來時啟動輪詢
     LaunchedEffect(Unit) {
@@ -44,7 +45,8 @@ fun MainApp(
             stockData = data,
             isDarkMode = isDarkMode,
             onThemeToggle = onThemeToggle,
-            categoryManager = categoryManager
+            categoryManager = categoryManager,
+            favoriteManager = favoriteManager
         )
     }
 }
@@ -83,4 +85,15 @@ class CategoryManager(context: Context) {
                 list.map { it["code"] ?: "" }.toSet()
             }
     }
+}
+
+class FavoriteManager(context: Context) {
+    private val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
+    fun getFavorites(): Set<String> = prefs.getStringSet("favorite_stocks", emptySet()) ?: emptySet()
+    fun getInventory(): Set<String> = prefs.getStringSet("inventory_stocks", emptySet()) ?: emptySet()
+
+    // 儲存方法也要準備好
+    fun saveFavorites(codes: Set<String>) = prefs.edit().putStringSet("favorite_stocks", codes).apply()
+    fun saveInventory(codes: Set<String>) = prefs.edit().putStringSet("inventory_stocks", codes).apply()
 }

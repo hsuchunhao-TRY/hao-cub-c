@@ -9,9 +9,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BusinessCenter
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BusinessCenter
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +38,10 @@ fun StockFrontContent(
     pe: StockPeModel?,
     avg: StockAvgPriceModel?,
     detail: StockDayDetailModel,
+    isFavorite: Boolean,
+    isInventory: Boolean,
+    onFavoriteClick: () -> Unit,
+    onInventoryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val closingVsAvgColor = getComparisonColor(detail.ClosingPrice, avg?.MonthlyAveragePrice)
@@ -45,34 +58,56 @@ fun StockFrontContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                // 1. 股票代號：從 labelSmall 提升，並明確指定大小
-                Text(
-                    text = detail.Code,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontSize = 16.sp,           // 加大到 16.sp
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray
-                )
-                // 2. 股票名稱：同步確保名稱夠大
-                Text(
-                    text = detail.Name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = 24.sp,           // 名稱可以給到 24.sp，非常醒目
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column {
+                    // 股票代號
+                    Text(
+                        text = detail.Code,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray
+                    )
+                    // 股票名稱
+                    Text(
+                        text = detail.Name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // 最愛按鈕 (星星)
+                IconButton(onClick = onFavoriteClick) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorite) Color(0xFFFFD700) else Color.Gray // 金色或灰色
+                    )
+                }
+
+                // 庫存按鈕 (公事包或箱子)
+                IconButton(onClick = onInventoryClick) {
+                    Icon(
+                        imageVector = if (isInventory) Icons.Filled.BusinessCenter else Icons.Outlined.BusinessCenter,
+                        contentDescription = "Inventory",
+                        tint = if (isInventory) MaterialTheme.colorScheme.primary else Color.Gray
+                    )
+                }
             }
+
             Column(horizontalAlignment = Alignment.End) {
-                // 4. 收盤價
+                // 收盤價
                 Text(
                     text = "$ ${detail.ClosingPrice}",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-//                    color = getPriceColor(detail.Change)
                     color = closingVsAvgColor
                 )
-                // 7. 漲跌價差
+                // 漲跌價差
                 Text(
                     text = detail.Change,
                     style = MaterialTheme.typography.bodyMedium,
@@ -83,7 +118,7 @@ fun StockFrontContent(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
 
-        // --- 第二行：價格細節 (3, 5, 6, 8) ---
+        // 開盤/最高/最低/月均價
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             SmallInfoColumn("開盤", detail.OpeningPrice, valueColor = openingVsAvgColor) // 3
             SmallInfoColumn("最高", detail.HighestPrice) // 5
@@ -93,7 +128,7 @@ fun StockFrontContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- 第三行：成交資訊 (9, 10, 11) ---
+        // 成交筆數/成交股數/成交金額
         Row(
             modifier = Modifier
                 .fillMaxWidth()

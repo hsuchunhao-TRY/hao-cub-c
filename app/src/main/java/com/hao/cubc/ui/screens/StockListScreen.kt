@@ -34,7 +34,11 @@ fun StockListScreen(
     displayList: List<StockDayDetailModel>,
     detailList: List<StockDayDetailModel>,
     peList: List<StockPeModel>,
-    avgList: List<StockAvgPriceModel>
+    avgList: List<StockAvgPriceModel>,
+    favoriteList: Set<String>,
+    inventoryList: Set<String>,
+    onFavoriteToggle: (String) -> Unit,
+    onInventoryToggle: (String) -> Unit
 ) {
     // 這裡我們直接使用傳入的 displayList 進行 LazyColumn 繪製
     LazyColumn(
@@ -79,11 +83,17 @@ fun StockListScreen(
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (rotation <= 90f) {
                         // 正面
+                        val stockCode = detailItem.Code
                         StockFrontContent(
                             detail = detailItem,
                             pe = peItem,
                             avg = avgItem,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            // 使用從參數傳進來的狀態與回調
+                            isFavorite = stockCode in favoriteList,
+                            isInventory = stockCode in inventoryList,
+                            onFavoriteClick = { onFavoriteToggle(stockCode) },
+                            onInventoryClick = { onInventoryToggle(stockCode) }
                         )
                     } else {
                         Box(
